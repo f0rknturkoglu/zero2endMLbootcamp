@@ -1,0 +1,621 @@
+================================================================================
+                    ZERO2END ML BOOTCAMP - PROJE REHBERI
+                         Adim Adim Uygulama Kilavuzu
+================================================================================
+
+Bu rehber, bootcamp projenizi basariyla tamamlamaniz icin gereken tum adimlari
+detayli olarak aciklamaktadir. Her adimi sirasiya takip edin.
+
+Son Teslim Tarihi: 9.12.2025
+Form: https://forms.gle/UEQuUJinWjdu32kM8
+
+================================================================================
+ADIM 1: SEKTOR VE PROBLEM SECIMI (Tahmini Sure: 1-2 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. Ilginizi ceken bir sektor secin
+[ ] 2. O sektordeki data science problemlerini arastirin
+[ ] 3. Cozebileceginiz bir problem belirleyin
+
+ORNEK SEKTORLER VE PROBLEMLER:
+------------------------------
+- Bankacilik: Credit scoring, fraud detection, churn prediction
+- E-Ticaret: Recommendation systems, churn prediction, search ranking
+- Oyun: User segmentation, LTV prediction, churn prediction
+- Saglik: Hastalik tahmini, risk skorlama
+- Finans: Hisse fiyat tahmini, risk analizi
+- Sigorta: Hasar tahmini, fiyatlandirma
+
+ONERILER:
+---------
+- Gercekten ilginizi ceken bir alan secin
+- Kaggle'da aktif veya gecmis yarismalara bakin
+- Ornek proje: https://github.com/enesmanan/credit-risk-model
+
+CIKTI:
+------
+- Sectiginiz sektor: _______________
+- Sectiginiz problem: _______________
+
+
+================================================================================
+ADIM 2: DATASET SECIMI (Tahmini Sure: 2-3 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. Probleminize uygun dataset arayin
+[ ] 2. Dataset'in kriterlere uygunlugunu kontrol edin
+[ ] 3. Dataset'i indirip data/raw/ klasorune koyun
+
+DATASET KRITERLERI:
+-------------------
+- Tabular format (.csv, .parquet, .xlsx)
+- Sentetik olmamali (Playground yarismalari ONERIYORUZ)
+- En az 10.000 satir
+- En az 10 feature
+
+DATASET KAYNAKLARI:
+-------------------
+1. Kaggle Yarismalar: https://www.kaggle.com/competitions
+   - Aktif veya gecmis yarismalari arayabilirsiniz
+   - Discussion ve kod kismindan faydalanabilirsiniz
+   - Submission atarak modelinizi test edebilirsiniz
+
+2. UCI ML Repository: https://archive.ics.uci.edu/ml/index.php
+
+3. Google Dataset Search: https://datasetsearch.research.google.com/
+
+4. Hugging Face Datasets: https://huggingface.co/datasets
+
+KAGGLE'DAN VERI INDIRME:
+------------------------
+# Kaggle API kurulumu
+pip install kaggle
+
+# API token'i ~/.kaggle/kaggle.json olarak kaydedin
+# Kaggle > Account > Create New API Token
+
+# Veri indirme
+kaggle competitions download -c [YARISMA_ADI]
+unzip [YARISMA_ADI].zip -d data/raw/
+
+CIKTI:
+------
+- Dataset adi: _______________
+- Kaynak: _______________
+- Satir sayisi: _______________
+- Feature sayisi: _______________
+
+
+================================================================================
+ADIM 3: EDA (Exploratory Data Analysis) (Tahmini Sure: 4-6 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. notebooks/01_eda.ipynb olusturun
+[ ] 2. Veriyi yukleyin ve inceleyin
+[ ] 3. Temel istatistikleri cikartin
+[ ] 4. Gorsellestirmeler yapin
+[ ] 5. Bulgularinizi markdown hucrelere yazin
+
+NOTEBOOK ICERIGI:
+-----------------
+1. Veri Yukleme
+   - pd.read_csv() veya pd.read_parquet()
+   - df.shape, df.info(), df.describe()
+
+2. Target Analizi
+   - Target dagilimi (dengeli mi, dengesiz mi?)
+   - value_counts() ve gorsellestirme
+
+3. Eksik Deger Analizi
+   - df.isnull().sum()
+   - Eksik deger oranlari
+   - Doldurma stratejisi belirleme
+
+4. Kategorik Degisken Analizi
+   - Kardinalite kontrolu
+   - Target ile iliski
+
+5. Numerik Degisken Analizi
+   - Dagilimlar (histogram, boxplot)
+   - Outlier tespiti
+   - Target ile iliski
+
+6. Korelasyon Analizi
+   - Korelasyon matrisi
+   - Yuksek korelasyonlu feature'lar
+
+7. Bulgular Ozeti
+   - Onemli cikarimlar
+   - Sonraki adimlar icin notlar
+
+DOKUMANTASYON:
+--------------
+[ ] docs/01_data_overview.md dosyasini doldurun
+
+CIKTI:
+------
+- Tamamlanmis EDA notebook
+- Doldurulmus dokumantasyon
+
+
+================================================================================
+ADIM 4: BASELINE MODEL (Tahmini Sure: 3-4 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. notebooks/02_baseline.ipynb olusturun
+[ ] 2. Basit bir preprocessing pipeline kurun
+[ ] 3. Baseline model egitip degerlendirin
+[ ] 4. Baseline skorunuzu kaydedin
+
+NOTEBOOK ICERIGI:
+-----------------
+1. Veri Hazirlama
+   - Train-test split
+   - Basit eksik deger doldurma (median/mode)
+   - Label encoding (kategorik icin)
+
+2. Baseline Model Secimi
+   - Logistic Regression (hizli, yorumlanabilir)
+   - veya LightGBM (default parametrelerle)
+
+3. Egitim ve Degerlendirme
+   - Cross-validation (Stratified K-Fold)
+   - Metrikler: AUC, Accuracy, Precision, Recall, F1
+
+4. Sonuclarin Kaydedilmesi
+   - Baseline skor
+   - Confusion matrix
+   - Classification report
+
+ORNEK KOD:
+----------
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+
+# Basit preprocessing
+X = df.drop(columns=['target', 'id'])
+y = df['target']
+
+# Eksik degerleri doldur
+X = X.fillna(X.median())
+
+# Label encoding
+for col in X.select_dtypes(include='object').columns:
+    X[col] = X[col].astype('category').cat.codes
+
+# Cross-validation
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+model = LogisticRegression(max_iter=1000)
+scores = cross_val_score(model, X, y, cv=cv, scoring='roc_auc')
+print(f"Baseline AUC: {scores.mean():.4f} (+/- {scores.std():.4f})")
+
+DOKUMANTASYON:
+--------------
+[ ] docs/02_baseline.md dosyasini doldurun
+
+CIKTI:
+------
+- Baseline AUC skoru: _______________
+- Tamamlanmis baseline notebook
+
+
+================================================================================
+ADIM 5: FEATURE ENGINEERING (Tahmini Sure: 8-12 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. notebooks/03_feature_engineering.ipynb olusturun
+[ ] 2. Yeni feature'lar turetin
+[ ] 3. Her fazda performans artisini olcun
+[ ] 4. Feature secimi yapin
+
+FEATURE ENGINEERING TEKNIKLERI:
+-------------------------------
+1. Aggregation Features
+   - Gruplar uzerinde mean, sum, count, std, min, max
+   - Ornek: Musterinin ortalama islem tutari
+
+2. Ratio Features
+   - Iki degiskenin orani
+   - Ornek: Kredi tutari / Gelir
+
+3. Time-based Features
+   - Gun, ay, yil, haftanin gunu
+   - Gecen sure hesaplamalari
+
+4. Polynomial Features
+   - Karesel, kubik terimler
+   - Carpim terimleri
+
+5. Binning
+   - Numerik degiskenleri kategorilere ayirma
+
+6. Target Encoding
+   - Kategorik degiskenleri target ortalamasi ile kodlama
+   - DIKKAT: Data leakage'a karsi fold bazli uygulama
+
+FEATURE SECIMI:
+---------------
+1. Dusuk varyansli feature'lari cikartin
+2. Yuksek korelasyonlu feature'lardan birini cikartin
+3. Feature importance'a gore secim yapin
+
+ORNEK KOD:
+----------
+# Aggregation ornegi
+agg_features = df.groupby('customer_id').agg({
+    'amount': ['mean', 'sum', 'count', 'std'],
+    'days_since_last': ['min', 'max']
+}).reset_index()
+agg_features.columns = ['_'.join(col) for col in agg_features.columns]
+
+# Ratio ornegi
+df['credit_income_ratio'] = df['credit_amount'] / df['income']
+
+# Her fazda performansi olc
+# Faz 1 sonrasi AUC: X.XXXX
+# Faz 2 sonrasi AUC: X.XXXX
+
+DOKUMANTASYON:
+--------------
+[ ] docs/03_feature_engineering.md dosyasini doldurun
+
+CIKTI:
+------
+- Turetilen feature sayisi: _______________
+- Feature engineering sonrasi AUC: _______________
+
+
+================================================================================
+ADIM 6: MODEL OPTIMIZASYONU (Tahmini Sure: 4-6 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. notebooks/04_model_optimization.ipynb olusturun
+[ ] 2. Farkli modelleri deneyin
+[ ] 3. Hiperparametre optimizasyonu yapin (Optuna)
+[ ] 4. En iyi modeli secin
+
+DENENECEK MODELLER:
+-------------------
+- LightGBM
+- XGBoost
+- CatBoost
+- Random Forest
+- Logistic Regression (baseline karsilastirmasi icin)
+
+OPTUNA ILE HIPERPARAMETRE OPTIMIZASYONU:
+----------------------------------------
+import optuna
+from lightgbm import LGBMClassifier
+from sklearn.model_selection import cross_val_score
+
+def objective(trial):
+    params = {
+        'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+        'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
+        'num_leaves': trial.suggest_int('num_leaves', 20, 100),
+        'max_depth': trial.suggest_int('max_depth', 3, 15),
+        'min_child_samples': trial.suggest_int('min_child_samples', 10, 100),
+        'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+        'reg_alpha': trial.suggest_float('reg_alpha', 0, 10),
+        'reg_lambda': trial.suggest_float('reg_lambda', 0, 10),
+    }
+    
+    model = LGBMClassifier(**params, random_state=42, n_jobs=-1, verbose=-1)
+    scores = cross_val_score(model, X, y, cv=5, scoring='roc_auc')
+    return scores.mean()
+
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=100, timeout=3600)
+
+print(f"Best AUC: {study.best_value:.4f}")
+print(f"Best params: {study.best_params}")
+
+DOKUMANTASYON:
+--------------
+[ ] docs/04_model_optimization.md dosyasini doldurun
+
+CIKTI:
+------
+- Secilen model: _______________
+- Optimizasyon sonrasi AUC: _______________
+- En iyi parametreler: _______________
+
+
+================================================================================
+ADIM 7: MODEL DEGERLENDIRME (Tahmini Sure: 4-6 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. notebooks/05_model_evaluation.ipynb olusturun
+[ ] 2. Feature importance analizi yapin
+[ ] 3. SHAP analizi yapin
+[ ] 4. Business gereksinimlerini kontrol edin
+[ ] 5. Final feature setini belirleyin
+
+FEATURE IMPORTANCE:
+-------------------
+import matplotlib.pyplot as plt
+
+# LightGBM feature importance
+importance = pd.DataFrame({
+    'feature': X.columns,
+    'importance': model.feature_importances_
+}).sort_values('importance', ascending=False)
+
+plt.figure(figsize=(10, 8))
+plt.barh(importance['feature'][:20], importance['importance'][:20])
+plt.title('Top 20 Feature Importance')
+plt.show()
+
+SHAP ANALIZI:
+-------------
+import shap
+
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X)
+
+# Summary plot
+shap.summary_plot(shap_values, X)
+
+# Tek bir tahmin icin
+shap.force_plot(explainer.expected_value, shap_values[0], X.iloc[0])
+
+BUSINESS GEREKSINIMLERI KONTROLU:
+---------------------------------
+1. Model yorumlanabilir mi?
+2. Esik degeri business gereksinimlerine uygun mu?
+3. Feature'lar mantikli mi?
+4. False positive/negative oranlari kabul edilebilir mi?
+
+DOKUMANTASYON:
+--------------
+[ ] docs/05_evaluation.md dosyasini doldurun
+
+CIKTI:
+------
+- Final feature sayisi: _______________
+- Final AUC: _______________
+- Baseline'dan gelisim: _______________
+
+
+================================================================================
+ADIM 8: FINAL PIPELINE (Tahmini Sure: 3-4 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. notebooks/06_final_pipeline.ipynb olusturun
+[ ] 2. Tum preprocessing ve model egitimini birlestirin
+[ ] 3. Final modeli kaydedin
+[ ] 4. Inference testleri yapin
+
+NOTEBOOK ICERIGI:
+-----------------
+1. Tum veriyi yukle
+2. Final preprocessing pipeline'i olustur
+3. Final model parametreleri ile egit
+4. Model ve preprocessor'u kaydet
+5. Inference testi yap
+
+MODEL KAYDETME:
+---------------
+import joblib
+
+# Model ve metadata kaydet
+model_data = {
+    'model': model,
+    'feature_names': X.columns.tolist(),
+    'preprocessor': preprocessor,
+    'metrics': {
+        'auc': final_auc,
+        'accuracy': final_accuracy
+    }
+}
+
+joblib.dump(model_data, 'models/final/model.pkl')
+
+CIKTI:
+------
+- Kaydedilmis model dosyasi
+- Tamamlanmis pipeline notebook
+
+
+================================================================================
+ADIM 9: API VE ARAYUZ (Tahmini Sure: 4-6 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. src/app.py dosyasini tamamlayin
+[ ] 2. API'yi test edin
+[ ] 3. Gradio/Streamlit arayuzu olusturun
+[ ] 4. Local'de calistirip test edin
+
+API CALISTIRMA:
+---------------
+# FastAPI
+python src/app.py
+
+# Swagger UI: http://localhost:8000/docs
+
+# Gradio
+python src/app.py gradio
+
+API TEST:
+---------
+curl -X POST "http://localhost:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d '{"features": {"feature1": 1.0, "feature2": 2.0}}'
+
+CIKTI:
+------
+- Calisan API
+- Calisan arayuz
+
+
+================================================================================
+ADIM 10: DEPLOYMENT (Tahmini Sure: 2-4 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. Deployment platformu secin
+[ ] 2. Gerekli dosyalari hazirlayin
+[ ] 3. Deploy edin
+[ ] 4. Test edin
+
+DEPLOYMENT SECENEKLERI:
+-----------------------
+
+1. RENDER (Onerilen - Ucretsiz)
+   - https://render.com
+   - GitHub repo'nuzu baglayin
+   - Web Service olusturun
+   - Build: pip install -r requirements.txt
+   - Start: uvicorn src.app:app --host 0.0.0.0 --port $PORT
+
+2. HUGGING FACE SPACES (Onerilen - Ucretsiz)
+   - https://huggingface.co/spaces
+   - Gradio veya Streamlit ile
+   - Dosyalari yukleyin
+
+3. STREAMLIT CLOUD (Ucretsiz)
+   - https://streamlit.io/cloud
+   - GitHub repo'nuzu baglayin
+
+4. HEROKU (Ucretli)
+   - Procfile gerekli
+   - web: uvicorn src.app:app --host 0.0.0.0 --port $PORT
+
+RENDER ICIN GEREKLI DOSYALAR:
+-----------------------------
+# requirements.txt (zaten var)
+
+# render.yaml (opsiyonel)
+services:
+  - type: web
+    name: ml-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.app:app --host 0.0.0.0 --port $PORT
+
+CIKTI:
+------
+- Deploy URL: _______________
+- Calisan uygulama
+
+
+================================================================================
+ADIM 11: DOKUMANTASYON VE README (Tahmini Sure: 2-3 saat)
+================================================================================
+
+YAPILACAKLAR:
+-------------
+[ ] 1. README.md dosyasini tamamlayin
+[ ] 2. docs/ klasorundeki tum dosyalari doldurun
+[ ] 3. Ekran goruntuleri ekleyin
+[ ] 4. Son kontrolleri yapin
+
+README ICERMESI GEREKENLER:
+---------------------------
+- Proje basligi
+- Problem aciklamasi
+- Deploy linki
+- Ekran goruntusu/video/gif
+- Sektor, dataset, pipeline, metrik bilgisi
+- Kullanilan teknolojiler
+- Local kurulum adimlari
+- Iletisim bilgileri
+- Repo yapisi
+
+REPODA CEVABI OLMASI GEREKENLER:
+--------------------------------
+1. Problem tanimi
+2. Baseline sureci ve skoru
+3. Feature engineering denemeleri ve sonuclari
+4. Validasyon semasi ve neden secildigi
+5. Final pipeline feature seti ve on isleme stratejisi
+6. Final model vs baseline basari farki
+7. Business gereksinimleri uyumlulugu
+8. Production deployment plani ve izlenecek metrikler
+
+
+================================================================================
+ADIM 12: SON KONTROL VE TESLIM (Tahmini Sure: 1-2 saat)
+================================================================================
+
+SON KONTROL LISTESI:
+--------------------
+[ ] Tum notebook'lar calisir durumda
+[ ] Model dosyasi kaydedilmis
+[ ] API calisiyor
+[ ] Deploy linki calisiyor
+[ ] README tamamlanmis
+[ ] docs/ klasoru dolu
+[ ] .gitignore dogru ayarlanmis
+[ ] requirements.txt guncel
+[ ] Git commit'leri duzgun
+
+TESLIM:
+-------
+1. GitHub repo'nuzu public yapin
+2. Form'u doldurun: https://forms.gle/UEQuUJinWjdu32kM8
+3. Son teslim: 9.12.2025
+
+
+================================================================================
+BONUS: OLSA GUZEL OLUR (Opsiyonel)
+================================================================================
+
+[ ] Git gecmisi: Duzgun commit'ler
+[ ] Monitoring sistemi: Tahminlerin loglanmasi
+[ ] Business kurgusu: Sistem tasarimi anlatimi
+[ ] Ust yonetim sunumu: Teknik olmayan kitleye sunum
+[ ] YouTube videosu: Projeyi anlatan kisa video
+[ ] Medium yazisi: Teknik blog yazisi
+
+
+================================================================================
+YARDIMCI KAYNAKLAR
+================================================================================
+
+Ornek Proje:
+https://github.com/enesmanan/credit-risk-model
+
+Made with ML:
+https://madewithml.com/
+
+ML Engineering Book:
+https://soclibrary.futa.edu.ng/books/Machine%20Learning%20Engineering
+
+Awesome Repo:
+https://github.com/Developer-MultiGroup/DMG-Data-Science-Awesome
+
+
+================================================================================
+NOTLAR
+================================================================================
+
+- Her adimi tamamladiginizda [ ] isaretini [X] olarak degistirin
+- Tahmini sureler kisilere gore degisebilir
+- Takildiginiz yerlerde ornek projeye bakin
+- Sorulariniz icin bootcamp iletisim kanallarini kullanin
+
+Basarilar!
+================================================================================
+
