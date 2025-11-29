@@ -111,3 +111,7 @@ temp/
 # Kaggle
 kaggle.json
 
+# PDF dosyalari
+*.pdf
+ML Bootcamp Final Proje.pdf
+
