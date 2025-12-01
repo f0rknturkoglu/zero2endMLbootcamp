@@ -1,60 +1,28 @@
 # Model Optimizasyonu
 
-## Hiperparametre Optimizasyonu
+## Özet ve Dokümantasyon
 
-### Kullanilan Yontem
+### Bu Aşamada Neler Yapıldı?
 
-- **Arac:** Optuna
-- **Deneme Sayisi:** X
-- **Timeout:** X saat
+Bu çalışmada iki farklı gradient boosting algoritmasını (LightGBM ve XGBoost) karşılaştırdık ve hiperparametre optimizasyonu yaptık.
 
-### Optimize Edilen Parametreler
+**Adımlar:**
+1. Önceki notebook'tan gelen feature set kullanıldı.
+2. **Duration** sütunu çıkarıldı çünkü production ortamında bu bilgi mevcut değil.
+3. **RandomizedSearchCV** ile 50 farklı parametre kombinasyonu denendi.
+4. Regularization parametreleri (L1, L2) eklendi.
+5. Her iki model test seti üzerinde değerlendirildi.
 
-| Parametre | Aralik | Optimal Deger |
-|-----------|--------|---------------|
-| n_estimators | [100, 2000] | X |
-| learning_rate | [0.01, 0.3] | X.XX |
-| num_leaves | [20, 100] | X |
-| max_depth | [3, 15] | X |
-| min_child_samples | [10, 100] | X |
-| subsample | [0.6, 1.0] | X.XX |
-| colsample_bytree | [0.6, 1.0] | X.XX |
-| reg_alpha | [0, 10] | X.XX |
-| reg_lambda | [0, 10] | X.XX |
+### Sonuçlar ve Yorumlar
 
-### Optimizasyon Sureci
+Duration olmadan elde ettiğimiz **~0.79-0.80 AUC** skoru bu veri seti için gerçekçi ve iyi bir sonuçtur. Duration feature'ı çıkarıldığında performansın düşmesi beklenen bir durumdu çünkü bu değişken target ile çok güçlü bir korelasyona sahipti.
 
-[Optuna optimizasyon grafigi ve aciklamasi]
+Hiperparametre optimizasyonu baseline'dan belirgin bir iyileşme sağlamadı. Bu da modelin zaten iyi çalıştığını ve veri setinin sınırlarında olduğumuzun bir göstergesi.
 
-## Model Karsilastirmasi
+### Önemli Kararlar
 
-| Model | AUC | Precision | Recall | F1 |
-|-------|-----|-----------|--------|-----|
-| Logistic Regression | X.XXXX | X.XX% | X.XX% | X.XX% |
-| Random Forest | X.XXXX | X.XX% | X.XX% | X.XX% |
-| LightGBM | X.XXXX | X.XX% | X.XX% | X.XX% |
-| XGBoost | X.XXXX | X.XX% | X.XX% | X.XX% |
-| CatBoost | X.XXXX | X.XX% | X.XX% | X.XX% |
+- **Duration Çıkarıldı:** Gerçek dünya senaryosunda, bir müşteri aramayı cevaplamadan önce görüşme süresini bilemeyiz. Bu yüzden bu feature'ı modelden çıkarmak doğru bir karardı.
 
-## Final Model
+- **Regularization:** Overfitting önlemek için L1 ve L2 regularization parametreleri eklendi. Ancak mevcut durumda büyük bir fark yaratmadı.
 
-- **Secilen Model:** [LightGBM]
-- **Secim Nedeni:** [En yuksek AUC, hizli egitim, vb.]
-
-### Final Parametreler
-
-```python
-{
-    "objective": "binary",
-    "metric": "auc",
-    "n_estimators": X,
-    "learning_rate": X.XX,
-    "num_leaves": X,
-    # ...
-}
-```
-
-## Kod
-
-Detayli kod icin: `notebooks/04_model_optimization.ipynb`
-
+- **Model Seçimi:** LightGBM ve XGBoost birbirine çok yakın performans gösterdi. Her iki model de production için uygun.

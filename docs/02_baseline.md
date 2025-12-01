@@ -1,57 +1,37 @@
 # Baseline Model
 
-## Amac
+## 5. Baseline Model Sonuçları
 
-Baseline model, daha karmasik modellerin performansini karsilastirmak icin bir referans noktasi olusturur.
+### Cross-Validation Sonuçları
+- **5-Fold CV AUC:** 0.9239 (+/- 0.0056)
+- Tüm fold'larda tutarlı performans
 
-## Kullanilan Yaklasim
+### Test Seti Sonuçları
+- **AUC:** 0.9259
+- **Accuracy:** 0.8607 (%86.07)
+- **Precision:** 0.8297
+- **Recall:** 0.8885
+- **F1 Score:** 0.8581
 
-### Feature Seti
+### En Önemli Feature'lar
+1. **month** (501) - Mevsimsellik etkisi
+2. **duration** (491) - ⚠️ **Production'da kullanılamaz!**
+3. **day** (419) - Ayın günü
+4. **balance** (339) - Müşteri bakiyesi
+5. **age** (296) - Müşteri yaşı
 
-- Sadece ana tablodaki feature'lar
-- Minimal on isleme
-- Eksik degerler median/mode ile dolduruldu
+### Önemli Notlar
+- Baseline model zaten çok iyi performans gösteriyor (AUC ~0.92)
+- `duration` feature'i en önemli feature'lardan biri ama **gerçekçi bir production modeli için çıkarılmalı**
+- Feature engineering ile daha da iyileştirilebilir
 
-### Model
+### Sonraki Adımlar
+1. **Feature Engineering** (03_feature_engineering.ipynb)
+   - Yas grupları
+   - Bakiye kategorileri
+   - Mevsimsellik feature'ları
+   - `duration` feature'ini çıkararak yeni baseline
 
-- **Model:** [Logistic Regression / LightGBM / ...]
-- **Parametreler:** Default parametreler
-
-### Validasyon
-
-- **Yontem:** [Stratified K-Fold / Train-Test Split]
-- **Fold Sayisi:** [5]
-
-## Sonuclar
-
-### Metrikler
-
-| Metrik | Deger |
-|--------|-------|
-| AUC | X.XXXX |
-| Accuracy | X.XX% |
-| Precision | X.XX% |
-| Recall | X.XX% |
-| F1 Score | X.XX% |
-
-### Cross-Validation Sonuclari
-
-| Fold | AUC |
-|------|-----|
-| 1 | X.XXXX |
-| 2 | X.XXXX |
-| 3 | X.XXXX |
-| 4 | X.XXXX |
-| 5 | X.XXXX |
-| **Ortalama** | **X.XXXX (+/- X.XXXX)** |
-
-## Cikarimlar
-
-1. [Baseline performansi hakkinda yorum]
-2. [Iyilestirme potansiyeli]
-3. [Sonraki adimlar]
-
-## Kod
-
-Detayli kod icin: `notebooks/02_baseline.ipynb`
-
+2. **Model Optimizasyonu** (04_model_optimization.ipynb)
+   - Hiperparametre optimizasyonu
+   - Model karşılaştırması

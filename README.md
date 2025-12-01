@@ -80,12 +80,12 @@ Uygulamayi denemek icin: [DEPLOY_LINKI_EKLENECEK]
 
 ## Metrikler
 
-| Metrik | Baseline | Final Model | Gelisim |
+| Metrik | Baseline (Duration ile) | Final Model (Gerçekçi) | Fark |
 |--------|----------|-------------|---------|
-| AUC    | -        | -           | -       |
-| Accuracy | -      | -           | -       |
-| Precision | -     | -           | -       |
-| Recall | -        | -           | -       |
+| AUC    | 0.9259   | 0.7828      | -15.45% |
+| Accuracy | 86.07% | 72.59%      | -15.66% |
+| Precision | 82.97%| 75.34%      | -9.19%  |
+| Recall | 88.85%   | 62.67%      | -29.47% |
 
 ## Kullanilan Teknolojiler
 
