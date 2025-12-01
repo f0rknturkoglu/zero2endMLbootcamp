@@ -10,11 +10,11 @@ Banka pazarlama ekipleri, hangi musterilerin vadeli mevduat acma olasiliginin yu
 
 ## Demo
 
-Uygulamayi denemek icin: [DEPLOY_LINKI_EKLENECEK]
+Uygulamayi denemek icin: [Canlı Demo (Hugging Face)](https://huggingface.co/spaces/f0rknturkoglu/bank-marketing-prediction)
 
 ## Ekran Goruntuleri
 
-[Ekran goruntuleri eklenecek]
+![Model Performansı](docs/model_performance.png)
 
 ## Sektor ve Problem
 
