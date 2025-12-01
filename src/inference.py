@@ -65,6 +65,18 @@ class ModelInference:
             self.feature_engineering_func = model_data.get("feature_engineering_func")
         else:
             self.model = model_data
+        
+        # Label encoders ayrı dosyada ise yükle
+        label_encoders_path = model_path.parent / "label_encoders.pkl"
+        if label_encoders_path.exists() and self.label_encoders is None:
+            self.label_encoders = joblib.load(label_encoders_path)
+            logger.info(f"Label encoders yuklendi: {label_encoders_path}")
+        
+        # Feature columns ayrı dosyada ise yükle
+        feature_columns_path = model_path.parent / "feature_columns.pkl"
+        if feature_columns_path.exists() and self.feature_names is None:
+            self.feature_names = joblib.load(feature_columns_path)
+            logger.info(f"Feature columns yuklendi: {feature_columns_path}")
             
         logger.info(f"Model basariyla yuklendi: {model_path}")
         if self.label_encoders:
@@ -114,14 +126,14 @@ class ModelInference:
             X_fe['age'], 
             bins=[0, 30, 40, 50, 60, 100], 
             labels=[0, 1, 2, 3, 4]
-        )
+        ).astype(int)
         
         # 2. Bakiye kategorileri
         X_fe['balance_category'] = pd.cut(
             X_fe['balance'], 
             bins=[-np.inf, 0, 100, 500, 2000, np.inf], 
             labels=[0, 1, 2, 3, 4]
-        )
+        ).astype(int)
         
         # 3. Never contacted flag
         X_fe['never_contacted'] = (X_fe['pdays'] == -1).astype(int)
@@ -158,6 +170,12 @@ class ModelInference:
                 X_fe[col] = X_fe[col].astype(str).apply(
                     lambda x: le.transform([x])[0] if x in le.classes_ else -1
                 )
+                # Integer'a çevir (LightGBM için)
+                X_fe[col] = X_fe[col].astype(int)
+        
+        # Categorical tipindeki sütunları da integer'a çevir
+        for col in X_fe.select_dtypes(include=['category']).columns:
+            X_fe[col] = X_fe[col].astype(int)
         
         return X_fe
     
