@@ -24,7 +24,7 @@ shap>=0.42.0
 # API & Web
 fastapi>=0.100.0
 uvicorn>=0.23.0
-gradio>=4.0.0
+gradio>=4.44.0
 streamlit>=1.28.0
 
 # Utilities
@@ -44,3 +44,5 @@ pytest>=7.4.0
 jupyter>=1.0.0
 ipykernel>=6.25.0
 
+
+huggingface-hub==0.19.4

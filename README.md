@@ -1,3 +1,15 @@
+---
+title: Bank Marketing Prediction
+emoji: 🏦
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Bank Marketing - Vadeli Mevduat Tahmini
 
 Zero2End Machine Learning Bootcamp - Uctan Uca ML Projesi

@@ -14,8 +14,8 @@ Bu dokuman projenin kurulumu ve calistirilmasi icin gerekli adimlari icerir.
 ### 1. Repository'yi Klonlama
 
 ```bash
-git clone https://github.com/[KULLANICI_ADI]/[REPO_ADI].git
-cd [REPO_ADI]
+git clone https://github.com/f0rknturkoglu/zero2endMLbootcamp.git
+cd zero2endMLbootcamp
 ```
 
 ### 2. Virtual Environment Olusturma
@@ -27,8 +27,8 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 
 # veya conda ile
-conda create -n ml-project python=3.10
-conda activate ml-project
+conda create -n bank-marketing python=3.10
+conda activate bank-marketing
 ```
 
 ### 3. Bagimliliklari Yukleme
@@ -46,24 +46,18 @@ pip install -r requirements.txt
 3. Komutu calistirin:
 
 ```bash
-kaggle competitions download -c [YARISMA_ADI]
-unzip [YARISMA_ADI].zip -d data/raw/
+kaggle datasets download -d janiobachmann/bank-marketing-dataset
+unzip bank-marketing-dataset.zip -d data/raw/
 ```
 
 #### Manuel:
 
-1. Kaggle'dan veri setini indirin
-2. `data/raw/` klasorune cikartin
+1. [Kaggle](https://www.kaggle.com/datasets/janiobachmann/bank-marketing-dataset) adresinden veri setini indirin
+2. `data/raw/` klasorune cikartin (`bank.csv` dosyasi olmali)
 
 ### 5. Konfigurasyon
 
-`src/config.py` dosyasini acin ve gerekli path'leri guncelleyin:
-
-```python
-TRAIN_DATA = RAW_DATA_DIR / "application_train.csv"  # Kendi dosya adiniz
-TARGET_COLUMN = "TARGET"  # Kendi target sutununuz
-ID_COLUMN = "SK_ID_CURR"  # Kendi ID sutununuz
-```
+`src/config.py` dosyasi varsayilan olarak Kaggle Bank Marketing datasetine gore ayarlanmistir. Ozel bir ayar yapmaniza gerek yoktur.
 
 ## Calistirma
 
@@ -75,7 +69,15 @@ jupyter notebook
 jupyter lab
 ```
 
-### Pipeline'i Calistirma
+Sırasıyla `notebooks/` klasorundeki notebook'lari calistirin:
+1. `01_eda.ipynb`
+2. `02_baseline.ipynb`
+3. `03_feature_engineering.ipynb`
+4. `04_model_optimization.ipynb`
+5. `05_model_evaluation.ipynb`
+6. `06_final_pipeline.ipynb`
+
+### Pipeline'i Calistirma (Tek Seferde Egitim)
 
 ```bash
 python src/pipeline.py
@@ -93,19 +95,32 @@ python src/app.py
 
 ```bash
 python src/app.py gradio
+# Arayuz: http://localhost:7860
+```
+
+## Deployment (Hugging Face Spaces)
+
+Bu proje Hugging Face Spaces uzerinde calismaktadir.
+
+**Canlı Demo:** [https://huggingface.co/spaces/f0rknturkoglu/bank-marketing-prediction](https://huggingface.co/spaces/f0rknturkoglu/bank-marketing-prediction)
+
+### Manuel Deployment Adimlari
+
+1. Hugging Face Space olusturun (SDK: Gradio)
+2. Bu repoyu Space'e pushlayin:
+
+```bash
+git remote add huggingface https://huggingface.co/spaces/f0rknturkoglu/bank-marketing-prediction
+git push huggingface main
 ```
 
 ## Sorun Giderme
 
 ### Hata: Model dosyasi bulunamadi
-
-Once notebook'lari calistirip modeli egitmeniz gerekiyor.
+Once notebook'lari veya `src/pipeline.py` scriptini calistirip modeli egitmeniz gerekiyor.
 
 ### Hata: Veri dosyasi bulunamadi
-
-`data/raw/` klasorune veri dosyalarinizi koydugunuzdan emin olun.
+`data/raw/` klasorune `bank.csv` dosyasini koydugunuzdan emin olun.
 
 ### Hata: Import hatasi
-
 Virtual environment'in aktif oldugunu ve bagimliliklarin yuklendigini kontrol edin.
-
