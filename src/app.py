@@ -303,6 +303,10 @@ CUSTOM_CSS = """
 def create_gradio_interface():
     """Gradio arayuzu olustur."""
     
+    # Monitoring DB
+    from src.monitoring import MonitoringDB
+    monitor = MonitoringDB()
+
     def predict_gradio(age, job, marital, education, default, balance, 
                       housing, loan, contact, day, month, campaign, 
                       pdays, previous, poutcome):
@@ -310,7 +314,7 @@ def create_gradio_interface():
         if inference.model is None:
             return "❌ Model yüklenmedi!", "", "⚠️ Bilinmiyor", ""
         
-        # Features dictionary olustur - tüm değerleri doğru tipe çevir
+        # Features dictionary olustur
         features = {
             "age": int(age) if age is not None else 45,
             "job": str(job) if job else "management",
@@ -331,6 +335,10 @@ def create_gradio_interface():
         
         try:
             result = inference.predict_single(features)
+            
+            # Loglama
+            monitor.log_prediction(features, result)
+            
             prob = result['probability']
             
             # Emoji ve renk bazlı sonuç
@@ -383,9 +391,33 @@ def create_gradio_interface():
             )
         except Exception as e:
             return f"❌ Hata: {str(e)}", "", "⚠️ Hata", ""
-    
+
+    def get_monitoring_stats():
+        """Monitoring istatistiklerini getir"""
+        stats = monitor.get_stats()
+        recent_logs = monitor.get_recent_logs()
+        
+        stats_html = f"""
+        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+            <div class="metric-card" style="flex: 1;">
+                <div style="font-size: 2em; color: #007bff;">{stats['total_predictions']}</div>
+                <div style="color: #666;">Toplam Tahmin</div>
+            </div>
+            <div class="metric-card" style="flex: 1;">
+                <div style="font-size: 2em; color: #28a745;">%{stats['positive_rate']:.1f}</div>
+                <div style="color: #666;">Pozitif Oranı</div>
+            </div>
+            <div class="metric-card" style="flex: 1;">
+                <div style="font-size: 2em; color: #ffc107;">%{stats['avg_probability']*100:.1f}</div>
+                <div style="color: #666;">Ortalama Olasılık</div>
+            </div>
+        </div>
+        """
+        
+        return stats_html, recent_logs
+
     # Input'lar - Bank Marketing Dataset feature'ları
-    with gr.Blocks() as interface:
+    with gr.Blocks(css=CUSTOM_CSS) as interface:
         
         # Header
         gr.HTML("""
@@ -397,203 +429,86 @@ def create_gradio_interface():
         </div>
         """)
         
-        with gr.Row():
-            # Sol Panel - Müşteri Bilgileri
-            with gr.Column(scale=1):
-                gr.HTML('<h3>👤 Müşteri Demografik Bilgileri</h3>')
-                
-                with gr.Group():
-                    age = gr.Slider(
-                        label="Yaş",
-                        minimum=18,
-                        maximum=95,
-                        value=45,
-                        step=1,
-                        info="Müşterinin yaşı"
-                    )
-                    
-                    job = gr.Dropdown(
-                        label="Meslek",
-                        choices=[
-                            ("👔 Yönetici", "management"),
-                            ("💼 Admin", "admin"),
-                            ("👷 Mavi Yaka", "blue-collar"),
-                            ("🔧 Teknisyen", "technician"),
-                            ("🛎️ Hizmet", "services"),
-                            ("🎓 Öğrenci", "student"),
-                            ("👴 Emekli", "retired"),
-                            ("💰 Girişimci", "entrepreneur"),
-                            ("🏠 Ev Hanımı", "housemaid"),
-                            ("📊 Serbest Meslek", "self-employed"),
-                            ("😔 İşsiz", "unemployed"),
-                            ("❓ Bilinmiyor", "unknown")
-                        ],
-                        value="management",
-                        info="Müşterinin mesleği"
-                    )
-                    
-                    marital = gr.Radio(
-                        label="Medeni Durum",
-                        choices=[
-                            ("💑 Evli", "married"),
-                            ("👤 Bekar", "single"),
-                            ("💔 Boşanmış", "divorced")
-                        ],
-                        value="married"
-                    )
-                    
-                    education = gr.Dropdown(
-                        label="Eğitim Seviyesi",
-                        choices=[
-                            ("🎓 Üniversite", "tertiary"),
-                            ("📚 Lise", "secondary"),
-                            ("📖 İlkokul", "primary"),
-                            ("❓ Bilinmiyor", "unknown")
-                        ],
-                        value="tertiary"
-                    )
-                
-                gr.HTML('<h3>💰 Finansal Durum</h3>')
-                
-                with gr.Group():
-                    balance = gr.Number(
-                        label="Yıllık Ortalama Bakiye (€)",
-                        value=1500,
-                        info="Hesap bakiyesi (negatif olabilir)"
-                    )
-                    
-                    default = gr.Radio(
-                        label="Kredi Temerrüt Geçmişi",
-                        choices=[("✅ Hayır", "no"), ("❌ Evet", "yes")],
-                        value="no"
-                    )
-                    
-                    housing = gr.Radio(
-                        label="Konut Kredisi Var mı?",
-                        choices=[("✅ Evet", "yes"), ("❌ Hayır", "no")],
-                        value="yes"
-                    )
-                    
-                    loan = gr.Radio(
-                        label="Bireysel Kredi Var mı?",
-                        choices=[("✅ Evet", "yes"), ("❌ Hayır", "no")],
-                        value="no"
-                    )
-            
-            # Orta Panel - Kampanya Bilgileri
-            with gr.Column(scale=1):
-                gr.HTML('<h3>📞 Kampanya Bilgileri</h3>')
-                
-                with gr.Group():
-                    contact = gr.Dropdown(
-                        label="İletişim Türü",
-                        choices=[
-                            ("📱 Cep Telefonu", "cellular"),
-                            ("☎️ Sabit Hat", "telephone"),
-                            ("❓ Bilinmiyor", "unknown")
-                        ],
-                        value="cellular"
-                    )
-                    
-                    with gr.Row():
-                        day = gr.Slider(
-                            label="İletişim Günü",
-                            minimum=1,
-                            maximum=31,
-                            value=15,
-                            step=1,
-                            info="Ayın kaçıncı günü"
-                        )
+        with gr.Tabs():
+            with gr.TabItem("🎯 Tahmin"):
+                with gr.Row():
+                    # Sol Panel - Müşteri Bilgileri
+                    with gr.Column(scale=1):
+                        gr.HTML('<h3>👤 Müşteri Demografik Bilgileri</h3>')
                         
-                        month = gr.Dropdown(
-                            label="İletişim Ayı",
-                            choices=[
-                                ("Ocak", "jan"), ("Şubat", "feb"), ("Mart", "mar"),
-                                ("Nisan", "apr"), ("Mayıs", "may"), ("Haziran", "jun"),
-                                ("Temmuz", "jul"), ("Ağustos", "aug"), ("Eylül", "sep"),
-                                ("Ekim", "oct"), ("Kasım", "nov"), ("Aralık", "dec")
-                            ],
-                            value="may"
-                        )
+                        with gr.Group():
+                            age = gr.Slider(label="Yaş", minimum=18, maximum=95, value=45, step=1)
+                            job = gr.Dropdown(label="Meslek", choices=["management", "technician", "entrepreneur", "blue-collar", "unknown", "retired", "admin", "services", "self-employed", "unemployed", "housemaid", "student"], value="management")
+                            marital = gr.Radio(label="Medeni Durum", choices=["married", "single", "divorced"], value="married")
+                            education = gr.Dropdown(label="Eğitim Seviyesi", choices=["tertiary", "secondary", "primary", "unknown"], value="tertiary")
+                        
+                        gr.HTML('<h3>💰 Finansal Durum</h3>')
+                        
+                        with gr.Group():
+                            balance = gr.Number(label="Yıllık Ortalama Bakiye (€)", value=1500)
+                            default = gr.Radio(label="Kredi Temerrüt Geçmişi", choices=["no", "yes"], value="no")
+                            housing = gr.Radio(label="Konut Kredisi Var mı?", choices=["yes", "no"], value="yes")
+                            loan = gr.Radio(label="Bireysel Kredi Var mı?", choices=["yes", "no"], value="no")
                     
-                    campaign = gr.Slider(
-                        label="Bu Kampanyada Yapılan Arama Sayısı",
-                        minimum=1,
-                        maximum=50,
-                        value=2,
-                        step=1,
-                        info="Bu kampanyada kaç kez arandı"
-                    )
-                
-                gr.HTML('<h3>📜 Önceki Kampanya Geçmişi</h3>')
-                
-                with gr.Group():
-                    pdays = gr.Number(
-                        label="Önceki Kampanyadan Bu Yana Geçen Gün",
-                        value=-1,
-                        info="-1 = Daha önce hiç aranmadı"
-                    )
+                    # Orta Panel - Kampanya Bilgileri
+                    with gr.Column(scale=1):
+                        gr.HTML('<h3>📞 Kampanya Bilgileri</h3>')
+                        
+                        with gr.Group():
+                            contact = gr.Dropdown(label="İletişim Türü", choices=["cellular", "telephone", "unknown"], value="cellular")
+                            with gr.Row():
+                                day = gr.Slider(label="İletişim Günü", minimum=1, maximum=31, value=15, step=1)
+                                month = gr.Dropdown(label="İletişim Ayı", choices=["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], value="may")
+                            campaign = gr.Slider(label="Bu Kampanyada Yapılan Arama Sayısı", minimum=1, maximum=50, value=2, step=1)
+                        
+                        gr.HTML('<h3>📜 Önceki Kampanya Geçmişi</h3>')
+                        
+                        with gr.Group():
+                            pdays = gr.Number(label="Önceki Kampanyadan Bu Yana Geçen Gün", value=-1)
+                            previous = gr.Slider(label="Önceki Kampanyalardaki Toplam Arama", minimum=0, maximum=50, value=0, step=1)
+                            poutcome = gr.Dropdown(label="Önceki Kampanya Sonucu", choices=["success", "failure", "other", "unknown"], value="unknown")
+                        
+                        # Tahmin Butonu
+                        gr.HTML('<br>')
+                        predict_btn = gr.Button("🎯 Tahmin Yap", variant="primary", size="lg")
                     
-                    previous = gr.Slider(
-                        label="Önceki Kampanyalardaki Toplam Arama",
-                        minimum=0,
-                        maximum=50,
-                        value=0,
-                        step=1
-                    )
-                    
-                    poutcome = gr.Dropdown(
-                        label="Önceki Kampanya Sonucu",
-                        choices=[
-                            ("✅ Başarılı", "success"),
-                            ("❌ Başarısız", "failure"),
-                            ("🔄 Diğer", "other"),
-                            ("❓ Bilinmiyor", "unknown")
-                        ],
-                        value="unknown"
-                    )
+                    # Sağ Panel - Sonuçlar
+                    with gr.Column(scale=1):
+                        gr.HTML('<h3>📊 Tahmin Sonucu</h3>')
+                        
+                        with gr.Group():
+                            prediction = gr.Textbox(label="🎯 Tahmin", interactive=False)
+                            probability = gr.Textbox(label="📈 Olasılık", interactive=False)
+                            risk_level = gr.Textbox(label="⚠️ Risk Seviyesi", interactive=False)
+                        
+                        explanation = gr.Markdown(label="📋 Detaylı Analiz")
                 
-                # Tahmin Butonu
-                gr.HTML('<br>')
-                predict_btn = gr.Button(
-                    "🎯 Tahmin Yap",
-                    variant="primary",
-                    size="lg"
+                # Event binding
+                predict_btn.click(
+                    fn=predict_gradio,
+                    inputs=[age, job, marital, education, default, balance,
+                           housing, loan, contact, day, month, campaign,
+                           pdays, previous, poutcome],
+                    outputs=[prediction, probability, risk_level, explanation]
                 )
-            
-            # Sağ Panel - Sonuçlar
-            with gr.Column(scale=1):
-                gr.HTML('<h3>📊 Tahmin Sonucu</h3>')
+
+            with gr.TabItem("📈 Monitoring"):
+                gr.Markdown("### 📊 Gerçek Zamanlı Model İzleme")
+                refresh_btn = gr.Button("🔄 Yenile")
+                stats_output = gr.HTML()
+                logs_output = gr.Dataframe(
+                    headers=["id", "timestamp", "age", "job", "balance", "campaign", "prediction", "probability", "risk_level"],
+                    label="Son Tahminler"
+                )
                 
-                with gr.Group():
-                    prediction = gr.Textbox(
-                        label="🎯 Tahmin",
-                        interactive=False,
-                        lines=1
-                    )
-                    
-                    probability = gr.Textbox(
-                        label="📈 Olasılık",
-                        interactive=False,
-                        lines=1
-                    )
-                    
-                    risk_level = gr.Textbox(
-                        label="⚠️ Risk Seviyesi",
-                        interactive=False,
-                        lines=1
-                    )
+                refresh_btn.click(
+                    fn=get_monitoring_stats,
+                    inputs=[],
+                    outputs=[stats_output, logs_output]
+                )
                 
-                explanation = gr.Markdown(label="📋 Detaylı Analiz")
-        
-        # Event binding
-        predict_btn.click(
-            fn=predict_gradio,
-            inputs=[age, job, marital, education, default, balance,
-                   housing, loan, contact, day, month, campaign,
-                   pdays, previous, poutcome],
-            outputs=[prediction, probability, risk_level, explanation]
-        )
+                # İlk yüklemede çalıştır
+                interface.load(get_monitoring_stats, None, [stats_output, logs_output])
         
         # Footer
         gr.HTML("""
